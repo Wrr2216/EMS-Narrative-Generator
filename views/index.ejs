@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS Narrative Generator</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>EMS Narrative Generator</h1>
+
+        <!-- Form Start -->
+        <form id="narrativeForm" action="/generate-narrative" method="POST">
+            <!-- Important Notes -->
+            <h2>Important Notes</h2>
+            <label for="importantNotes">Notes (Optional):</label>
+            <textarea id="importantNotes" name="importantNotes" rows="3" placeholder="Enter any important notes here..."></textarea>
+
+            <!-- Dispatch Section -->
+            <h2>Dispatch</h2>
+            <label for="unit">Unit Number:</label>
+            <input type="text" id="unit" name="unit" placeholder="e.g., 7222" required>
+
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="e.g., residence" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" placeholder="e.g., 32" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <label for="chiefComplaint">Chief Complaint:</label>
+            <input type="text" id="chiefComplaint" name="chiefComplaint" required>
+
+            <label for="conditionOnArrival">Condition on Arrival:</label>
+            <input type="text" id="conditionOnArrival" name="conditionOnArrival" required>
+
+            <!-- History Section -->
+            <h2>History</h2>
+            <label for="symptoms">Symptoms:</label>
+            <input type="text" id="symptoms" name="symptoms" placeholder="e.g., shortness of breath" required>
+
+            <label for="duration">Duration:</label>
+            <input type="text" id="duration" name="duration" placeholder="e.g., 15 minutes" required>
+
+            <label for="medicalHistory">Medical History:</label>
+            <input type="text" id="medicalHistory" name="medicalHistory" placeholder="e.g., Hypertension" required>
+
+            <!-- Assessment Section -->
+            <h2>Assessment</h2>
+            <label for="gcs">GCS Score:</label>
+            <input type="number" id="gcs" name="gcs" value="15" required>
+
+            <label for="ao">Alert and Oriented (AOx):</label>
+            <input type="number" id="ao" name="ao" value="4" required>
+
+            <label for="skin">Skin Condition:</label>
+            <input type="text" id="skin" name="skin" placeholder="e.g., Warm, Pink, Dry" required>
+
+            <label for="vitals">Vital Signs:</label>
+            <input type="text" id="vitals" name="vitals" placeholder="e.g., BP 120/80, HR 76" required>
+
+            <label for="findings">Differential Findings:</label>
+            <input type="text" id="findings" name="findings" placeholder="e.g., No acute distress" required>
+
+            <label for="ekgFindings">EKG Findings:</label>
+            <input type="text" id="ekgFindings" name="ekgFindings" placeholder="e.g., Normal sinus rhythm">
+
+            <!-- Treatment Section -->
+            <h2>Treatment</h2>
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" name="destination" placeholder="e.g., Local Hospital" required>
+
+            <label for="gaugeLocation">IV Gauge and Location:</label>
+            <input type="text" id="gaugeLocation" name="gaugeLocation" placeholder="e.g., 20G Right AC">
+
+            <label for="medications">Medications Administered:</label>
+            <input type="text" id="medications" name="medications" placeholder="e.g., ASA 324mg">
+
+            <!-- Transport Section -->
+            <h2>Transport</h2>
+            <label for="transportType">Transport Type:</label>
+            <select id="transportType" name="transportType" required>
+                <option value="">Select</option>
+                <option value="emergent">Emergent</option>
+                <option value="non-emergent">Non-Emergent</option>
+            </select>
+
+            <label for="hospital">Hospital:</label>
+            <input type="text" id="hospital" name="hospital" placeholder="e.g., General Hospital" required>
+
+            <label for="communicationMethod">Communication Method:</label>
+            <select id="communicationMethod" name="communicationMethod" required>
+                <option value="">Select</option>
+                <option value="radio">Radio</option>
+                <option value="phone">Phone</option>
+            </select>
+
+            <label for="eta">ETA (Minutes):</label>
+            <input type="number" id="eta" name="eta" placeholder="e.g., 25" required>
+
+            <label for="erRoom">ER Room:</label>
+            <input type="text" id="erRoom" name="erRoom" placeholder="e.g., 6" required>
+
+            <!-- Signature -->
+            <label for="signature">Signature:</label>
+            <input type="text" id="signature" name="signature" value="Logan Miller, Paramedic 31195" readonly>
+
+            <button type="submit">Submit Narrative</button>
+        </form>
+
+        <!-- Real-Time Preview -->
+        <h2>Generated Narrative</h2>
+        <textarea id="narrativePreview" rows="15" cols="80" readonly></textarea>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const updateNarrative = () => {
+                const importantNotes = $('#importantNotes').val().trim();
+                let narrative = ``;
+
+                // Add Important Notes if available
+                if (importantNotes) {
+                    narrative += `### Important Notes:\n${importantNotes}\n\n`;
+                }
+
+                // Add the rest of the narrative
+                narrative += `
+#### Dispatch:
+${$('#unit').val()} was dispatched to ${$('#location').val()} for a ${$('#age').val()}-year-old ${$('#gender').val()} with complaints/reports of ${$('#chiefComplaint').val()}.
+
+#### History:
+The patient reports experiencing ${$('#symptoms').val()} for ${$('#duration').val()}. The patient is awake, alert, and oriented x${$('#ao').val()}, and capable of making informed decisions. The patient has ${$('#medicalHistory').val() || "no pertinent medical history"}.
+
+#### Assessment:
+The patient is GCS ${$('#gcs').val()}, AOx${$('#ao').val()}.
+- Skin: ${$('#skin').val()}.
+- Pupils: PERRL (Pupils Equal, Round, Reactive to Light).
+- Vital signs: ${$('#vitals').val()}.
+- Differential findings: ${$('#findings').val()}.
+
+#### EKG:
+${$('#ekgFindings').val()}.
+
+#### Rx/Treatment:
+The patient requested transport to ${$('#destination').val()}.
+- The patient was assisted onto the stretcher, secured with straps x4 and rails x2, and positioned comfortably.
+- IV access was established with ${$('#gaugeLocation').val() || "N/A"}${$('#gaugeLocation').val() ? " and maintained with a saline lock" : ""}.
+- ${$('#medications').val() || "No medications were administered."}
+- Ongoing monitoring was conducted en route with regular reassessments of the patient’s condition and vital signs. No changes in the patient’s condition were noted during transport.
+
+#### Transport:
+Transport began ${$('#transportType').val()} to ${$('#hospital').val()} per the patient’s choice. A ${$('#communicationMethod').val()} report was provided to the receiving facility with a ${$('#eta').val()}-minute ETA.
+
+Upon arrival, the patient was registered and taken to ER Room ${$('#erRoom').val()}. Handoff report was given to the RN, and patient care was transferred.
+
+At this time, the unit cleared and returned to service.
+
+${$('#signature').val()}
+                `;
+
+                // Update the narrative preview
+                $('#narrativePreview').val(narrative);
+            };
+
+            // Attach event listeners to all inputs
+            $('#narrativeForm input, #narrativeForm textarea, #narrativeForm select').on('input change', updateNarrative);
+
+            // Initialize the narrative preview
+            updateNarrative();
+        });
+    </script>
+</body>
+</html>
